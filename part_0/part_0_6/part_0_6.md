@@ -5,7 +5,7 @@ sequenceDiagram
   participant Server
 
   User->>+Browser: User writes the note in the form tag and presses the submit/save button
-  Note right under Browser: The form has an event handler attached to it to handle the submit event
+  Note right of Browser: The form has an event handler attached to it to handle the submit event
   Browser->>Browser: The browser receives the event of the user pressing the save button which triggers a function.
   Browser->>Browser: The function starts by preventing the default behaviour of the from submission.
   Browser->>Broswer: The function then creates a note object with two keys, content which has the user submitted note as its value and a date which is generated when the function runs. 
