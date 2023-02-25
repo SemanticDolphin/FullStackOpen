@@ -9,12 +9,24 @@ const App = () => {
   const handleChange = (event) => {
     setNewName(event.target.value)
   }
+  const normalizeName = (name) => (name.replace(/\s+/g, '').toLowerCase());
+
+  const canNotAddNameToPhonebook = (name) => {
+    const existingNames = persons.reduce((previous, current) => {
+      // return previous.concat(current.name) //Simple comparison
+      return previous.concat(normalizeName(current.name)) //Removes spaces and sets name to lowercase to make comparison stricter
+    }, [])
+    // return existingNames.includes(name); // Simple comparison
+    return existingNames.includes(normalizeName(name));
+  }
   const handleSubmit = (event) => {
     event.preventDefault();
-    setPersons([...persons, { name: newName }])
+    canNotAddNameToPhonebook(newName) ?
+      alert(`${newName} is already in the Phonebook`) :
+      setPersons([...persons, { name: newName }])
     setNewName('')
-
   }
+
   return (
     <div>
       <h2>Phonebook</h2>
