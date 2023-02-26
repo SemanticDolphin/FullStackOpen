@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 
+const SERVER_URL = 'http://localhost:3001/persons'
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
@@ -8,7 +10,7 @@ const App = () => {
   const [nameFilter, setNameFilter] = useState('')
   useEffect(() => {
     axios
-      .get('http://localhost:3001/persons')
+      .get(SERVER_URL)
       .then(response => {
         setPersons(response.data)
       })
@@ -30,14 +32,21 @@ const App = () => {
     // return existingNames.includes(name); // Simple comparison
     return existingNames.includes(normalizeName(name));
   }
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    const newPerson = { name: newName, number: newNumber }
     canNotAddNameToPhonebook(newName) ?
       alert(`${newName} is already in the Phonebook`) :
-      setPersons([...persons, { name: newName, number: newNumber }])
-    setNewName('')
-    setNewNumber('')
+      axios
+        .post(SERVER_URL, newPerson)
+        .then(res => {
+          setPersons(persons.concat(res.data))
+          setNewName('')
+          setNewNumber('')
+        })
   }
+
   const filteredPersons = persons.filter(person => normalizeName(person.name).includes(normalizeName(nameFilter)))
 
 
@@ -82,7 +91,7 @@ const PersonForm = ({ name, number, handleSubmit, handleNameChange, handleNumber
 }
 const Persons = ({ persons }) => {
   return (
-    persons.map((person => <Person key={person.name} name={person.name} number={person.number} />))
+    persons.map((person => <Person key={person.id} name={person.name} number={person.number} />))
   )
 }
 
