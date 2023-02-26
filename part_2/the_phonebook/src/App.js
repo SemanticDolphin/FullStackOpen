@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
+import personServices from './services/persons'
 
-const SERVER_URL = 'http://localhost:3001/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -9,11 +9,9 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [nameFilter, setNameFilter] = useState('')
   useEffect(() => {
-    axios
-      .get(SERVER_URL)
-      .then(response => {
-        setPersons(response.data)
-      })
+    personServices
+      .getAll()
+      .then(initialPersons => setPersons(initialPersons))
   }, [])
 
   const handleNameFilter = (event) => setNameFilter(event.target.value)
@@ -38,10 +36,10 @@ const App = () => {
     const newPerson = { name: newName, number: newNumber }
     canNotAddNameToPhonebook(newName) ?
       alert(`${newName} is already in the Phonebook`) :
-      axios
-        .post(SERVER_URL, newPerson)
-        .then(res => {
-          setPersons(persons.concat(res.data))
+      personServices
+        .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
         })
