@@ -11,5 +11,9 @@ const create = (newObject) => {
   const request = axios.post(SERVER_URL, newObject)
   return request.then(response => response.data)
 }
+const removePerson = (personId) => {
+  const request = axios.delete(`${SERVER_URL}/${personId}`)
+  return request // Probably not needed to extract the response data as it is just an empty object
+}
 
-export default { getAll, create }
+export default { getAll, create, removePerson }

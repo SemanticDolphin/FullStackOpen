@@ -45,6 +45,14 @@ const App = () => {
         })
   }
 
+  const removePerson = ({ id, name }) => {
+    if (window.confirm(`Do you want to remove ${name} from the phonebook`)) {
+      personServices
+        .removePerson(id)
+        .then(() => setPersons(persons.filter(person => person.id !== id)))
+    }
+  }
+
   const filteredPersons = persons.filter(person => normalizeName(person.name).includes(normalizeName(nameFilter)))
 
 
@@ -61,7 +69,7 @@ const App = () => {
         handleSubmit={handleSubmit}
       />
       <h2>Numbers</h2>
-      <Persons persons={filteredPersons} />
+      <Persons persons={filteredPersons} removePerson={removePerson} />
     </div>
   )
 }
@@ -87,16 +95,23 @@ const PersonForm = ({ name, number, handleSubmit, handleNameChange, handleNumber
     </form>
   )
 }
-const Persons = ({ persons }) => {
+const Persons = ({ persons, removePerson }) => {
   return (
-    persons.map((person => <Person key={person.id} name={person.name} number={person.number} />))
+    persons.map((person => (
+      <Person
+        key={person.id}
+        name={person.name}
+        number={person.number}
+        removePerson={() => removePerson(person)}
+      />)
+    ))
   )
 }
 
-const Person = ({ name, number }) => {
+const Person = ({ name, number, removePerson }) => {
   return (
     <p>
-      {name} | {number}
+      {name} | {number} <button onClick={removePerson}>Delete</button>
     </p>
   )
 }
