@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
 import personServices from './services/persons'
 
@@ -8,6 +7,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [nameFilter, setNameFilter] = useState('')
+  const [notification, setNotification] = useState({ message: null, success: null })
+
   useEffect(() => {
     personServices
       .getAll()
@@ -36,6 +37,12 @@ const App = () => {
     const foundPerson = persons.find(person => normalizeName(person.name) === normalizeName(name))
     return foundPerson.id
   }
+  const notficationSetter = (message, successStatus) => {
+    return (
+      setNotification({ message: message, success: successStatus }),
+      setTimeout(() => { setNotification({ message: null, success: null }) }, 2000)
+    )
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -47,6 +54,7 @@ const App = () => {
         .updateNumber(personIdFromName(newName), newPerson)
         .then(returnedPerson => {
           setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
+          notficationSetter(`Updated the number of '${returnedPerson.name}' in the phonebook`, true)
           setNewName('')
           setNewNumber('')
         })
@@ -55,8 +63,10 @@ const App = () => {
         .create(newPerson)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
+          notficationSetter(`Added '${returnedPerson.name}' to the phonebook`, true)
           setNewName('')
           setNewNumber('')
+
         })
         .catch(error => console.log(`error: ${error}`))
   }
@@ -65,7 +75,10 @@ const App = () => {
     if (window.confirm(`Do you want to remove ${name} from the phonebook`)) {
       personServices
         .removePerson(id)
-        .then(() => setPersons(persons.filter(person => person.id !== id)))
+        .then(() => {
+          setPersons(persons.filter(person => person.id !== id))
+          notficationSetter(`Removed '${name}' from the phonebook`, true)
+        })
         .catch(error => (console.log(`error: ${error}`)));
 
     }
@@ -77,6 +90,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification.message} success={notification.success} />
       <Filter onChange={handleNameFilter} value={nameFilter} />
       <h2>Add a new person</h2>
       <PersonForm
@@ -131,6 +145,27 @@ const Person = ({ name, number, removePerson }) => {
     <p>
       {name} | {number} <button onClick={removePerson}>Delete</button>
     </p>
+  )
+}
+
+const Notification = ({ message, success }) => {
+  if (message === null) {
+    return null
+  }
+  const color = success ? 'green' : 'red'
+  const notificationStyle = {
+    color: color,
+    borderColor: 'currentColor',
+    borderWidth: 3,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+
+  }
+  return (
+    <div style={notificationStyle} className='message'>
+      {message}
+    </div>
   )
 }
 
