@@ -13,7 +13,10 @@ const App = () => {
     personServices
       .getAll()
       .then(initialPersons => setPersons(initialPersons))
-      .catch(error => console.log(`something went wrong: ${error}`))
+      .catch(error => {
+        console.log(`something went wrong: ${error}`)
+        notficationHelper(`something went wrong`)
+      })
   }, [])
 
   const handleNameFilter = (event) => setNameFilter(event.target.value)
@@ -37,16 +40,15 @@ const App = () => {
     const foundPerson = persons.find(person => normalizeName(person.name) === normalizeName(name))
     return foundPerson.id
   }
-  const notficationSetter = (message, successStatus) => {
-    return (
-      setNotification({ message: message, success: successStatus }),
-      setTimeout(() => { setNotification({ message: null, success: null }) }, 2000)
-    )
+  const notficationHelper = (message, successStatus) => {
+    setNotification({ message: message, success: successStatus })
+    setTimeout(() => { setNotification({ message: null, success: null }) }, 2000)
   }
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const newPerson = { name: newName, number: newNumber }
+
 
     nameExists(newName) ?
       window.confirm(`${newName} is already in the phonebook. Do you want to replace the number with the new one`) &&
@@ -54,21 +56,27 @@ const App = () => {
         .updateNumber(personIdFromName(newName), newPerson)
         .then(returnedPerson => {
           setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
-          notficationSetter(`Updated the number of '${returnedPerson.name}' in the phonebook`, true)
+          notficationHelper(`Updated the number of '${returnedPerson.name}' in the phonebook`, true)
           setNewName('')
           setNewNumber('')
         })
-        .catch(error => console.log(`error: ${error}`)) :
+        .catch(error => {
+          console.log(`error: ${error}`)
+          notficationHelper(`Information of ${newPerson.name} has already been removed`, false)
+          setPersons(persons.filter(person => person.id !== personIdFromName(newName)))
+        }) :
       personServices
         .create(newPerson)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          notficationSetter(`Added '${returnedPerson.name}' to the phonebook`, true)
+          notficationHelper(`Added '${returnedPerson.name}' to the phonebook`, true)
           setNewName('')
           setNewNumber('')
-
         })
-        .catch(error => console.log(`error: ${error}`))
+        .catch(error => {
+          console.log(`error: ${error}`)
+          notficationHelper(`Something went wrong`, false)
+        })
   }
 
   const removePerson = ({ id, name }) => {
@@ -77,9 +85,13 @@ const App = () => {
         .removePerson(id)
         .then(() => {
           setPersons(persons.filter(person => person.id !== id))
-          notficationSetter(`Removed '${name}' from the phonebook`, true)
+          notficationHelper(`Removed '${name}' from the phonebook`, true)
         })
-        .catch(error => (console.log(`error: ${error}`)));
+        .catch(error => {
+          console.log(`error: ${error}`)
+          notficationHelper(`Information of ${name} has already been removed`, false)
+          setPersons(persons.filter(person => person.id !== id))
+        });
 
     }
   }
