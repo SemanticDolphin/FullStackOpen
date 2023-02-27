@@ -16,4 +16,10 @@ const removePerson = (personId) => {
   return request // Probably not needed to extract the response data as it is just an empty object
 }
 
-export default { getAll, create, removePerson }
+const updateNumber = (personId, newObject) => {
+  const request = axios.put(`${SERVER_URL}/${personId}`, newObject)
+  return request.then(response => response.data)
+
+}
+
+export default { getAll, create, removePerson, updateNumber }

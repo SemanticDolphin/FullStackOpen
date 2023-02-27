@@ -12,6 +12,7 @@ const App = () => {
     personServices
       .getAll()
       .then(initialPersons => setPersons(initialPersons))
+      .catch(error => console.log(`something went wrong: ${error}`))
   }, [])
 
   const handleNameFilter = (event) => setNameFilter(event.target.value)
@@ -22,7 +23,7 @@ const App = () => {
 
   const normalizeName = (name) => (name.replace(/\s+/g, '').toLowerCase());
 
-  const canNotAddNameToPhonebook = (name) => {
+  const nameExists = (name) => {
     const existingNames = persons.reduce((previous, current) => {
       // return previous.concat(current.name) //Simple comparison
       return previous.concat(normalizeName(current.name)) //Removes spaces and sets name to lowercase to make comparison stricter
@@ -31,11 +32,25 @@ const App = () => {
     return existingNames.includes(normalizeName(name));
   }
 
+  const personIdFromName = (name) => {
+    const foundPerson = persons.find(person => normalizeName(person.name) === normalizeName(name))
+    return foundPerson.id
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const newPerson = { name: newName, number: newNumber }
-    canNotAddNameToPhonebook(newName) ?
-      alert(`${newName} is already in the Phonebook`) :
+
+    nameExists(newName) ?
+      window.confirm(`${newName} is already in the phonebook. Do you want to replace the number with the new one`) &&
+      personServices
+        .updateNumber(personIdFromName(newName), newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(error => console.log(`error: ${error}`)) :
       personServices
         .create(newPerson)
         .then(returnedPerson => {
@@ -43,6 +58,7 @@ const App = () => {
           setNewName('')
           setNewNumber('')
         })
+        .catch(error => console.log(`error: ${error}`))
   }
 
   const removePerson = ({ id, name }) => {
@@ -50,6 +66,8 @@ const App = () => {
       personServices
         .removePerson(id)
         .then(() => setPersons(persons.filter(person => person.id !== id)))
+        .catch(error => (console.log(`error: ${error}`)));
+
     }
   }
 
