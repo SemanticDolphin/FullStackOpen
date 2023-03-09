@@ -6,44 +6,70 @@ const API_ENDPOINT = "https://restcountries.com/v3.1/all";
 function App() {
   const [search, setSearch] = useState("");
   const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+
   useEffect(() => {
-    axios.get(API_ENDPOINT).then((res) => setCountries(res.data));
+    axios
+      .get(API_ENDPOINT)
+      .then((res) => setCountries(res.data))
+      .catch((error) => console.error(`something went wrong: ${error}`));
   }, []);
 
-  const handleChange = (event) => setSearch(event.target.value);
+  const handleChange = (event) => {
+    setSearch(event.target.value);
+    setSelectedCountry(null);
+  };
+
+  const showCountry = (country) => setSelectedCountry(country);
+
   const filteredCountries = countries.filter((country) =>
     country.name.common.toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => {
+    if (filteredCountries.length === 1) {
+      setSelectedCountry(filteredCountries[0]);
+    }
+  }, [filteredCountries]);
 
   return (
     <div>
       <p>Find countries</p>
       <input value={search} onChange={handleChange} />
-      {filteredCountries.length > 10 ? (
+      {selectedCountry ? (
+        <CountryFull country={selectedCountry} />
+      ) : filteredCountries.length > 10 ? (
         <p>Too many matches, specify your filter more precisely</p>
       ) : (
-        <ListedCountries countries={filteredCountries} />
+        <ListedCountries
+          countries={filteredCountries}
+          showCountry={showCountry}
+        />
       )}
     </div>
   );
 }
-const ListedCountries = ({ countries }) => {
-  console.log(countries);
+const ListedCountries = ({ countries, showCountry }) => {
   return (
     <>
-      {countries.length > 1
-        ? countries.map((country) => (
-            <CountrySmall country={country} key={country.name.common} />
-          ))
-        : countries.map((country) => (
-            <CountryFull key={country.name.common} country={country} />
-          ))}
+      {countries.map((country) => (
+        <CountrySmall
+          country={country}
+          key={country.name.common}
+          showCountry={showCountry}
+        />
+      ))}
     </>
   );
 };
 
-const CountrySmall = ({ country }) => {
-  return <p>{country.name.common}</p>;
+const CountrySmall = ({ country, showCountry }) => {
+  return (
+    <p>
+      {country.name.common}
+      <button onClick={() => showCountry(country)}>show</button>
+    </p>
+  );
 };
 
 const CountryFull = ({ country }) => {
