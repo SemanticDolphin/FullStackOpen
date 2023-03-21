@@ -1,13 +1,15 @@
-const config = require("./utils/config");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+
+const config = require("./utils/config");
+const logger = require("./utils/logger");
 
 const blogsRouter = require("./controllers/blogs");
 
 const app = express();
 
-console.log(`connecting to ${config.MONGODB_URI}`);
+logger.info(`connecting to ${config.MONGODB_URI}`);
 mongoose.connect(config.MONGODB_URI);
 
 app.use(cors());
