@@ -1,6 +1,6 @@
 const listHelper = require("../utils/list_helper");
 
-describe("Most blogs", () => {
+describe("Most Likes", () => {
   const blogs = [
     {
       _id: "5a422a851b54a676234d17f7",
@@ -51,7 +51,7 @@ describe("Most blogs", () => {
       __v: 0,
     },
   ];
-  const multipleTopAuthors = [
+  const multipleTopLikes = [
     {
       _id: "5a422a851b54a676234d17f7",
       title: "React patterns",
@@ -89,7 +89,7 @@ describe("Most blogs", () => {
       title: "TDD harms architecture",
       author: "Robert C. Martin",
       url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-      likes: 0,
+      likes: 7,
       __v: 0,
     },
   ];
@@ -106,30 +106,30 @@ describe("Most blogs", () => {
   ];
 
   test("When passed an empty array, it should return null", () => {
-    expect(listHelper.mostBlogs([])).toBe(null);
+    expect(listHelper.mostLikes([])).toBe(null);
   });
 
-  test("when list has only one blog, it will return the author of that blog with a count of 1", () => {
-    const result = listHelper.mostBlogs(listWithOneBlog);
+  test("when list has only one blog, it will return the author of that blog and the likes connected to it", () => {
+    const result = listHelper.mostLikes(listWithOneBlog);
     expect(result).toEqual({
       author: "Edsger W. Dijkstra",
-      blogs: 1,
+      likes: 5,
     });
   });
 
   test("Bigger list of blogs should return the author with the most blogs", () => {
-    const result = listHelper.mostBlogs(blogs);
+    const result = listHelper.mostLikes(blogs);
     expect(result).toEqual({
-      author: "Robert C. Martin",
-      blogs: 3,
+      author: "Edsger W. Dijkstra",
+      likes: 17,
     });
   });
 
-  test("Blog list with multiple top bloggers should return either one of the bloggers", () => {
-    const result = listHelper.mostBlogs(multipleTopAuthors);
+  test("Multiple bloggers with top likes, return the first blogger", () => {
+    const result = listHelper.mostLikes(blogs);
     expect(result).toEqual({
       author: "Edsger W. Dijkstra",
-      blogs: 2,
+      likes: 17,
     });
   });
 });
